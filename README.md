@@ -19,4 +19,4 @@ samples, guidance on mobile development, and a full API reference.
 -Add your Credentials file from dialogflow to assets folder to use
 
 ## Download from this 
-- [download](https://drive.google.com/file/d/1jJlXB6e3QeKxDbqjCLfxpK153c2vR_Ud/view?usp=sharing)
+- [apk file](https://drive.google.com/file/d/1jJlXB6e3QeKxDbqjCLfxpK153c2vR_Ud/view?usp=sharing)
