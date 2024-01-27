@@ -37,7 +37,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     AuthGoogle authGoogle =
         //Change the file name to your json file downloaded from dialogflow
         await AuthGoogle(fileJson: "assets/dialog_flow_auth.json").build();
-    DialogFlow dialogflow = DialogFlow(authGoogle: authGoogle, language: "th");
+    DialogFlow dialogflow = DialogFlow(authGoogle: authGoogle, language: "en");
     AIResponse aiResponse = await dialogflow.detectIntent(query);
     // Check if user input matches the specific string
     for (var message in aiResponse.getListMessage()!) {
@@ -78,8 +78,10 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   
   void showInitialChips() {
     final List<dynamic> initialChips = [
-      {"text": "สัตว์เลี้ยงมีอาการผิดปกติ"},
-      {"text": "ข้อมูลของคลินิคที่ลงทะเบียน"}
+      {"text": "คุยแก้เหงา"},
+      {"text": "กินไรดี"},
+      {"text": "ไปเที่ยวไหนดี"},
+      {"text": "แนะนำเพลงหน่อย"}
     ];
 
     setState(() {
@@ -96,7 +98,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     super.initState();
     setState(() {
       messsages
-          .insert(0, {"data": 0, "message": "สวัสดีต้องการใช้บริการอะไรครับ"});
+          .insert(0, {"data": 0, "message": "สวัสดีมีอะใย"});
     });
     showInitialChips();
   }
@@ -155,7 +157,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                     hintText: "Type Your Message",
                     hintStyle: TextStyle(
                       color: Colors.black.withOpacity(0.5),
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                     border: InputBorder.none,
@@ -201,103 +203,96 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   }
 
   Widget chat(
-      String message, int data, List<dynamic>? chips, List<dynamic>? cards) {
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20),
-      child: Row(
-        mainAxisAlignment:
-            data == 1 ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          data == 0
-              ? const SizedBox(
-                  height: 40,
-                  width: 40,
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage("assets/robot.jpg"),
-                  ),
-                )
-              : Container(),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: cards != null
-                ? Wrap(
-                    direction: Axis.vertical,
-                    runSpacing: 4.0,
-                    spacing: 8.0,
-                    children: cards
-                        .map(
-                          (card) => InkWell(
-                            onTap: () {
-                              (card[
-                                  'link']); // Do nothing or remove this onTap function if you don't want any action to be taken.
-                            },
-                            child: Column(
-                              children: [
-                                Image.network(
-                                  card['image'],
-                                  height: 100,
-                                  width: 100,
-                                ),
-                                const SizedBox(height: 5),
-                                Text(card['title']),
-                                const SizedBox(height: 5),
-                                Text(
-                                  card['subtitle'],
-                                  style: const TextStyle(fontSize: 9),
-                                ),
-                              ],
-                            ),
+  String message, int data, List<dynamic>? chips, List<dynamic>? cards) {
+  return Container(
+    padding: const EdgeInsets.only(left: 20, right: 20),
+    child: Row(
+      mainAxisAlignment: data == 1 ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [
+        data == 0
+            ? const SizedBox(
+                height: 40,
+                width: 40,
+                child: CircleAvatar(
+                  backgroundImage: AssetImage("assets/robot.jpg"),
+                ),
+              )
+            : Container(),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: cards != null
+              ? Wrap(
+                  direction: Axis.vertical,
+                  runSpacing: 4.0,
+                  spacing: 8.0,
+                  children: cards.map(
+                    (card) => InkWell(
+                      onTap: () {
+                        if (card.containsKey('link')) {
+                          _launchUrl(card['link']); // Launch the URL if available
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          Image.network(
+                            card['image'],
+                            height: 100,
+                            width: 100,
                           ),
-                        )
-                        .toList(),
-                  )
-                : chips != null
-                    ? Wrap(
-                        direction: Axis.vertical, // ตั้งค่าเป็นแนวตั้ง
-                        runSpacing: 4.0, // ตั้งค่าระยะห่างระหว่างบรรทัด
-                        spacing: 8.0,
-                        children: chips
-                            .map(
-                              (chip) => ActionChip(
-                                backgroundColor:
-                                    const Color.fromRGBO(186, 255, 206, 1),
-                                label: Text(chip['text'],
-                                    style: const TextStyle(
-                                        color: Color.fromARGB(255, 7, 7, 7))),
-                                onPressed: () {
-                                  // Check if 'link' is present in the chip payload.
-                                  // If it exists, launch the URL; otherwise, send the text as a message.
-                                  if (chip.containsKey('link')) {
-                                    // ignore: deprecated_member_use
-                                    launch(chip['link']);
-                                  } else {
-                                    setState(() {
-                                      messsages.insert(0,
-                                          {"data": 1, "message": chip['text']});
-                                    });
-                                    response(chip['text']);
-                                  }
-                                },
-                              ),
-                            )
-                            .toList(),
-                      )
-                    : Bubble(
-                        radius: const Radius.circular(15.0),
-                        color: data == 0
-                            ? const Color.fromRGBO(156, 247, 235, 1)
-                            : const Color.fromARGB(255, 248, 208, 155),
-                        elevation: 0.0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              const SizedBox(
-                                width: 10.0,
-                              ),
-                              Flexible(
-                                  child: Container(
+                          const SizedBox(height: 5),
+                          Text(card['title']),
+                          const SizedBox(height: 5),
+                          Text(
+                            card['subtitle'],
+                            style: const TextStyle(fontSize: 9),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ).toList(),
+                )
+              : chips != null
+                  ? Wrap(
+                      direction: Axis.vertical,
+                      runSpacing: 4.0,
+                      spacing: 8.0,
+                      children: chips.map(
+                        (chip) => ActionChip(
+                          backgroundColor:
+                              const Color.fromRGBO(186, 255, 206, 1),
+                          label: Text(chip['text'],
+                              style: const TextStyle(
+                                  color: Color.fromARGB(255, 7, 7, 7))),
+                          onPressed: () {
+                            if (chip.containsKey('link')) {
+                              _launchUrl(chip['link']);
+                            } else {
+                              setState(() {
+                                messsages.insert(0,
+                                    {"data": 1, "message": chip['text']});
+                              });
+                              response(chip['text']);
+                            }
+                          },
+                        ),
+                      ).toList(),
+                    )
+                  : Bubble(
+                      radius: const Radius.circular(15.0),
+                      color: data == 0
+                          ? const Color.fromRGBO(156, 247, 235, 1)
+                          : const Color.fromARGB(255, 248, 208, 155),
+                      elevation: 0.0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            const SizedBox(
+                              width: 10.0,
+                            ),
+                            Flexible(
+                              child: Container(
                                 constraints:
                                     const BoxConstraints(maxWidth: 200),
                                 child: Text(
@@ -305,24 +300,26 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                                   style: const TextStyle(
                                       color: Color.fromARGB(255, 12, 12, 12)),
                                 ),
-                              ))
-                            ],
-                          ),
+                              ),
+                            )
+                          ],
                         ),
                       ),
-          ),
-          data == 1
-              ? const SizedBox(
-                  height: 40,
-                  width: 40,
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage("assets/default.jpg"),
-                  ),
-                )
-              : Container(),
-        ],
-      ),
-    );
-  }
+                    ),
+        ),
+        data == 1
+            ? const SizedBox(
+                height: 40,
+                width: 40,
+                child: CircleAvatar(
+                  backgroundImage: AssetImage("assets/default.jpg"),
+                ),
+              )
+            : Container(),
+      ],
+    ),
+  );
+}
+
 }
 
